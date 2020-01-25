@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "config": "^3.2.2",
-    "js-yaml": "^3.12.0",
+    "js-yaml": "^3.13.1",
     "kafkajs": "^1.11.0",
     "long": "^4.0.0",
     "uuid-parse": "^1.0.0",
