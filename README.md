@@ -1,5 +1,6 @@
 # 安装环境
-参考[ThingBoard](https://blog.csdn.net/ieflex/article/details/97106750)
+1. 参考[ThingBoard](https://blog.csdn.net/ieflex/article/details/97106750)
+2. 参考CSDN[CSDN博客](https://blog.csdn.net/ieflex/article/details/97106750)
 - jdk1.8+
 - maven3
 - nodejs8+
