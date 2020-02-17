@@ -97,6 +97,12 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
 
     private volatile SessionInfoProto sessionInfo;
     private volatile InetSocketAddress address;
+    /**
+     * 维持当前设备连接会话
+     * - 会话Id，sessionId
+     * - 设备实例，deviceInfo，根据设备实例是否存在来判断设备是否连接
+     * - 主题Qos水平，ConcurrentHashMap
+     */
     private volatile DeviceSessionCtx deviceSessionCtx;
     private volatile GatewaySessionHandler gatewaySessionHandler;
 
@@ -491,6 +497,14 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
         }
     }
 
+    /**
+     * 设备成功连接后的回调函数
+     * - 设备信息（deviceInfo）放入设备会话中（deviceSessionCtx）
+     * - 实例化会话信息（sessionInfo，注意区别deviceSessionCtx）
+     * -
+     * @param msg
+     * @param ctx
+     */
     private void onValidateDeviceResponse(ValidateDeviceCredentialsResponseMsg msg, ChannelHandlerContext ctx) {
         if (!msg.hasDeviceInfo()) {
             ctx.writeAndFlush(createMqttConnAckMsg(CONNECTION_REFUSED_NOT_AUTHORIZED));

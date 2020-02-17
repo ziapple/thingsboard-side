@@ -4,13 +4,14 @@
 - jdk1.8+
 - maven3
 - nodejs8+
+- git
 
 # 安装步骤
 ### Maven Install
+mvn clean install -DskipTests
 
-mvn clean install –DskipTests
-
-第一次安装时间比较长，我装了2个小时，安装完成如下
+第一次安装时间比较长，安装完成如下,
+如果安装时候报License错误，可以去掉pom下面的license-maven-plugin
 
 ![安装成功](./img/install-thingsboard-success.jpg)
 

@@ -22,6 +22,12 @@ import com.google.common.util.concurrent.ListenableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
+/**
+ * 线程异步回调模板
+ * 1. 如果配置了transport.type=local，调用本地模式（该模式为默认模式）。
+ * 2. 如果transport.type=remote，则调用{@code AsyncCallbackTemplate}
+ * 3. remote比local多了一个timeoutInMs线程超时时间，以及回调方法执行的callbackExecutor
+ */
 public class DonAsynchron {
 
     public static  <T> void withCallback(ListenableFuture<T> future, Consumer<T> onSuccess,
