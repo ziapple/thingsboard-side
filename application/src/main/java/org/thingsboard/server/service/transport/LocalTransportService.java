@@ -59,7 +59,17 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 /**
- * Created by ashvayka on 12.10.18.
+ * 处理Mqtt、Http的服务：本地模式
+ * 1. 如果transport.type=local,采用本地模式
+ *  - 对所有请求交给{@code DonAsynchron.withcallback}异步回调线程进行处理
+ *  - 业务逻辑由{@code LocalTransportApiService}完成
+ *  - 业务逻辑都是本地的Future任务，直接查询本地数据库
+ * 2. 如果transport.type=remote,采用远程模式{@code RemoteTransportService}
+ *  - 对所有请求交给{@code AsyncCallbackTemplate.withCallback}异步回调线程进行处理
+ *  - 业务逻辑由{@code TbKafkaRequestTemplate}和{@code TBKafkaProducerTemplate}处理
+ *  - 业务逻辑这两个类会发送任务消息给Kafka
+ * 3. local和remote共同点
+ *  - 所有请求都封装成 protobuf格式
  */
 @Slf4j
 @Service

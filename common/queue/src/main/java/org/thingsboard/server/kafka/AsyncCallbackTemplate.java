@@ -25,7 +25,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
- * Created by ashvayka on 05.10.18.
+ * 线程异步回调模板
+ * 1. 如果配置了transport.type=local，调用本地模式（该模式为默认模式）。
+ * 2. 如果transport.type=remote，则调用{@code AsyncCallbackTemplate}
+ * 3. remote比local多了一个timeoutInMs线程超时时间，以及回调方法执行的callbackExecutor
  */
 public class AsyncCallbackTemplate {
 

@@ -97,6 +97,7 @@ public class LocalTransportApiService implements TransportApiService {
         return getEmptyTransportApiResponseFuture();
     }
 
+
     private ListenableFuture<TransportApiResponseMsg> validateCredentials(String credentialsId, DeviceCredentialsType credentialsType) {
         //TODO: Make async and enable caching
         DeviceCredentials credentials = deviceCredentialsService.findDeviceCredentialsByCredentialsId(credentialsId);

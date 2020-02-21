@@ -4,13 +4,14 @@
 - jdk1.8+
 - maven3
 - nodejs8+
+- git
 
 # 安装步骤
 ### Maven Install
+mvn clean install -DskipTests
 
-mvn clean install –DskipTests
-
-第一次安装时间比较长，我装了2个小时，安装完成如下
+第一次安装时间比较长，安装完成如下,
+如果安装时候报License错误，可以去掉pom下面的license-maven-plugin
 
 ![安装成功](./img/install-thingsboard-success.jpg)
 
@@ -83,7 +84,7 @@ C1客户下创建U1用户，客户C1可以使用U1用户进行登录，配置资
 创建D1设备，跟客户C1绑定，
 - 属性
  - 服务端属性，不填， 默认包括设备状态active，设备不活跃时刻inactiveAlarmTime，设备最后活跃时刻lastActiveTime，设备最后连接时刻lastConnectTime，设备最后失联时刻lastDisconnectTime
- - 客户端属性，不填，设备本地的属性，一般包括固件版本等属性
+ - 客户端属性，设备本地上传来的属性，设备json{key:value}上传的数据会自动识别出来作为客户端属性
  - 共享属性，不填
 - 最新遥测，自动显示设备最新上传的时序数据，例如huminity,temperature
 
@@ -117,3 +118,86 @@ C1客户下创建U1用户，客户C1可以使用U1用户进行登录，配置资
 - node mqtt/simulator-contral.js ${Token}
 - 添加Control Widget，选择温度
 
+### Mqtt客户端测试
+- 安装node.js,设置node的环境变量
+- 安装mqtt客户端
+  - cd ${NODE_PATH}, npm install mqtt,这样就可以使用mqtt批处理命令
+1. 推送时序消息, 注意$ACCESS_TOKEN不需要单引号，在设备->最新遥测会显示
+```shell script
+mqtt pub -v -h "127.0.0.1" -t "v1/devices/me/telemetry" -u '$ACCESS_TOKEN' -m {'key':'value'}
+```
+2. 发送设备客户端属性，在设备的属性->客户端属性会显示出来
+```shell script
+mqtt pub -d -h "127.0.0.1" -t "v1/devices/me/attributes" -u '$ACCESS_TOKEN' -m {'key':'value'}
+```
+3. 获取设备属性
+```jshelllanguage
+var mqtt = require('mqtt')
+var client  = mqtt.connect('mqtt://127.0.0.1',{
+    username: process.env.TOKEN
+})
+
+client.on('connect', function () {
+    console.log('connected')
+    client.subscribe('v1/devices/me/attributes/response/+')
+    client.publish('v1/devices/me/attributes/request/1', '{"clientKeys":"attribute1,attribute2", "sharedKeys":"shared1,shared2"}')
+})
+
+client.on('message', function (topic, message) {
+    console.log('response.topic: ' + topic)
+    console.log('response.body: ' + message.toString())
+    client.end()
+})
+```
+```shell script
+export TOKEN=$ACCESS_TOKEN
+node mqtt-js-attributes-request.js
+```
+4. 订阅设备属性更新
+```shell script
+# Subscribes to attribute updates
+mqtt sub -v "127.0.0.1" -t "v1/devices/me/attributes" -u '$ACCESS_TOKEN'
+```
+5. 订阅服务端RPC
+```jshelllanguage
+var mqtt = require('mqtt');
+var client  = mqtt.connect('mqtt://127.0.0.1',{
+    username: process.env.TOKEN
+});
+
+client.on('connect', function () {
+    console.log('connected');
+    client.subscribe('v1/devices/me/rpc/request/+')
+});
+
+client.on('message', function (topic, message) {
+    console.log('request.topic: ' + topic);
+    console.log('request.body: ' + message.toString());
+    var requestId = topic.slice('v1/devices/me/rpc/request/'.length);
+    //client acts as an echo service
+    client.publish('v1/devices/me/rpc/response/' + requestId, message);
+});
+```
+6. 订阅客户端RPC
+```jshelllanguage
+var mqtt = require('mqtt');
+var client = mqtt.connect('mqtt://127.0.0.1', {
+    username: process.env.TOKEN
+});
+
+client.on('connect', function () {
+    console.log('connected');
+    client.subscribe('v1/devices/me/rpc/response/+');
+    var requestId = 1;
+    var request = {
+        "method": "getTime",
+        "params": {}
+    };
+    client.publish('v1/devices/me/rpc/request/' + requestId, JSON.stringify(request));
+});
+
+client.on('message', function (topic, message) {
+    console.log('response.topic: ' + topic);
+    console.log('response.body: ' + message.toString());
+});
+```
