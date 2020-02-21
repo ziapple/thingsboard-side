@@ -81,3 +81,20 @@ client.on('message', function (topic, message) {
     console.log('response.body: ' + message.toString());
 });
 ```
+
+HTTP测试
+- 工具 PostMan
+- API清单，访问swagger-ui.html
+- 获取Token，[登录URL](http://localhost:8080/api/auth/login)
+```
+{
+    "username":"ziapple@126.com",
+	"password":"zp150719"
+}
+```
+- 获取设备属性
+[属性URL](http://localhost:8080/api/plugins/telemetry/DEVICE/68da06a0-538b-11ea-8aa0-2be100bc01b3/values/attributes)
+header中添加X-Authorization,value：Bearer ${JWT_TOKEN}
+- 获取设备时序数据
+[URL](http://localhost:8080/api/plugins/telemetry/DEVICE/68da06a0-538b-11ea-8aa0-2be100bc01b3/values/timeseries?limit=100&interval=1&startTs=1582128000&entTs=1582128000)
+?limit=10&interval=2
