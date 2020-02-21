@@ -104,7 +104,11 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
     // 客户端连接地址
     private volatile InetSocketAddress address;
     /**
+<<<<<<< HEAD
      * 设备连接会话上下文
+=======
+     * 维持当前设备连接会话
+>>>>>>> c4b3c1a30b43c5eb84bcc1df7e33966218307f07
      * - 会话Id，sessionId
      * - 设备实例，deviceInfo，根据设备实例是否存在来判断设备是否连接
      * - 主题Qos水平，ConcurrentHashMap
