@@ -23,8 +23,22 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by yyh on 2017/5/2.
- * CORS configuration
+ * 基于cors协议实现跨域请求，/api/**所有请求都支持跨域访问
+ * # spring CORS configuration
+ * spring.mvc.cors:
+ *    mappings:
+ *      # Intercept path
+ *       "[/api/**]":
+ *          #Comma-separated list of origins to allow. '*' allows all origins. When not set,CORS support is disabled.
+ *          allowed-origins: "*"
+ *          #Comma-separated list of methods to allow. '*' allows all methods.
+ *          allowed-methods: "*"
+ *          #Comma-separated list of headers to allow in a request. '*' allows all headers.
+ *          allowed-headers: "*"
+ *          #How long, in seconds, the response from a pre-flight request can be cached by clients.
+ *          max-age: "1800"
+ *          #Set whether credentials are supported. When not set, credentials are not supported.
+ *          allow-credentials: "true"
  */
 @Configuration
 @ConfigurationProperties(prefix = "spring.mvc.cors")

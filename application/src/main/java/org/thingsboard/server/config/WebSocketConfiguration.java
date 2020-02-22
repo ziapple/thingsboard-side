@@ -36,6 +36,9 @@ import org.thingsboard.server.service.security.model.SecurityUser;
 
 import java.util.Map;
 
+/**
+ * WebSocket配置
+ */
 @Configuration
 @EnableWebSocket
 public class WebSocketConfiguration implements WebSocketConfigurer {

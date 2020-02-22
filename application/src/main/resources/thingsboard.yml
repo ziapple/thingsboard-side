@@ -86,7 +86,7 @@ cluster:
   # Queue partition id for current node
   partition_id: "${QUEUE_PARTITION_ID:0}"
   stats:
-    enabled: "${TB_CLUSTER_STATS_ENABLED:false}"
+    enabled: "${TB_CLUSTER_STATS_ENABLED:true}"
     print_interval_ms: "${TB_CLUSTER_STATS_PRINT_INTERVAL_MS:10000}"
 
 # Plugins configuration parameters
@@ -463,7 +463,7 @@ js:
     # JS Eval max request timeout. 0 - no timeout
     max_requests_timeout: "${LOCAL_JS_MAX_REQUEST_TIMEOUT:0}"
     stats:
-      enabled: "${TB_JS_LOCAL_STATS_ENABLED:false}"
+      enabled: "${TB_JS_LOCAL_STATS_ENABLED:true}"
       print_interval_ms: "${TB_JS_LOCAL_STATS_PRINT_INTERVAL_MS:10000}"
   # Remote JavaScript environment properties
   remote:
@@ -482,7 +482,7 @@ js:
     # Maximum allowed JavaScript execution errors before JavaScript will be blacklisted
     max_errors: "${REMOTE_JS_SANDBOX_MAX_ERRORS:3}"
     stats:
-      enabled: "${TB_JS_REMOTE_STATS_ENABLED:false}"
+      enabled: "${TB_JS_REMOTE_STATS_ENABLED:true}"
       print_interval_ms: "${TB_JS_REMOTE_STATS_PRINT_INTERVAL_MS:10000}"
 
 transport:

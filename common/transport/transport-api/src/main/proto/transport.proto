@@ -21,6 +21,8 @@ option java_outer_classname = "TransportProtos";
 
 /**
  * Data Structures;
+ * MSB(Most Significant Bit)最高位
+ * LSB(Least Significant Bit)最低位
  */
 message SessionInfoProto {
   string nodeId = 1;

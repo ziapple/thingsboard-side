@@ -41,6 +41,10 @@ import static com.google.common.base.Predicates.not;
 import static com.google.common.collect.Lists.newArrayList;
 import static springfox.documentation.builders.PathSelectors.regex;
 
+/**
+ * Swagger配置
+ * 默认访问：http://localhost:8080/swagger-ui.html
+ */
 @Configuration
 public class SwaggerConfiguration {
 

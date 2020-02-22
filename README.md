@@ -111,9 +111,40 @@ C1客户下创建U1用户，客户C1可以使用U1用户进行登录，配置资
 ### 发送设备数据
 
 - http方式，http curl -v -X POST -d @telemetry-data-as-object.json http://localhost:8080/api/v1/$ACCESS_TOKEN/telemetry --header "Content-Type:application/json"
-- mqtt方式，node mqtt/simulaor.js ${Token}
+- mqtt方式，node mqtt/simulaor.js ${Token} eg. qgzyQEtnHrrLcO6Z5Ya0
 
 ### 服务端控制设备
 - node mqtt/simulator-contral.js ${Token}
 - 添加Control Widget，选择温度
 
+## 基于ThingsBoard开发
+### 开发框架2.5.0
+- SpringBoot 2.1.3.RELEASE
+- Nodejs v10.16.0
+- Spring Security 5.1.4.RELEASE
+- JPA Hibernate 5.3.7.Final
+- Swagger 2.6.1
+- NIO netty 4.1.37.Final
+
+### 模块介绍
+- *application* spring boot程序的主入口，controller、service层
+- *common* 公用模块，Model、transport API层
+- *dao* 数据层
+- *msa* 
+- *transport* http,mqtt,coap服务端，接受来自客户端设备的数据
+- *netty-mqtt* mqtt的客户端
+- *rule-engine* 规则引擎
+- *ui* 前端UI工程
+- *tools* 数据迁移工具
+- *docker,k8s* 打包成镜像
+
+## API测试
+- 所有API地址:http://localhost:8080/swagger-ui.html
+- 登录API,/api/auth/login,拿到token放到header中可以调用所有API,header如下：
+```shell script
+X-Authorization
+```
+
+## 如何学习ThingsBoard
+1. 直接通过源码学习还是比较费劲，穆书伟给我们提供了很好的学习TB[一系列教程](https://github.com/IoT-Technology/IOT-Technical-Guide)
+2. 通过教程首先的掌握COAP、MQTT这些协议

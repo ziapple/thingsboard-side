@@ -303,10 +303,29 @@
                     </includes>
                 </configuration>
             </plugin>
+            <!--
+                unix和windows下安装系统所需要的资源文件拷贝,用于unix环境rmp、deb和windows环境exe打包
+                1. unix资源文件包括target/conf,target/bin,target/control,target/data这几个目录
+                   unix将可执行jar打包成rpm，通过systemctl start thingsboard启动service
+                  - 默认以loadDemo=true运行，系统会额外加载demo数据
+                  - 默认安装目录在usr/share/thingsboard
+                  - 数据文件在/usr/share/thingsboard/data下
+                  - 配置文件在usr/share/thingsboard/conf下
+                  - 日志目录/var/log/thingsboard下
+                2. windows资源文件包括target/windows/,target/windows/install这几个目录
+                3. 无论哪种环境database和redis都需要自行安装
+                4. 打包过程过于复杂和繁琐，应该弄成unix和windows两个目录，windows估计是后面版本才加上的，初学者可以不看
+                5. 为了用上这个插件，推荐用rpm来部署安装系统
+            -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
                 <executions>
+                    <!--
+                         unix资源文件拷贝
+                         1. resources文件拷贝到target/conf下面，unix打包需要用到conf这个目录
+                         2. logback.xml不拷贝
+                    -->
                     <execution>
                         <id>copy-conf</id>
                         <phase>process-resources</phase>
@@ -326,6 +345,11 @@
                             </resources>
                         </configuration>
                     </execution>
+                    <!--
+                       unix日志和环境变量拷贝
+                       1. src/main/conf拷贝到target/conf下面,把logback.xml日志文件和thingsboard.conf环境变量拷贝过去
+                       2. 用filter/unix.properties的pkg.logFolder替换logback.xml中的日志目录，这么做的是为了区别unix和windows的日志目录
+                    -->
                     <execution>
                         <id>copy-service-conf</id>
                         <phase>process-resources</phase>
@@ -345,6 +369,11 @@
                             </filters>
                         </configuration>
                     </execution>
+                    <!--
+                       windows资源文件拷贝,日志文件拷贝到target/windows/conf
+                       1. resources文件拷贝到target/windows/conf
+                       2. src/main/conf目录下的文件拷贝到target/windows/conf下面
+                    -->
                     <execution>
                         <id>copy-win-conf</id>
                         <phase>process-resources</phase>
@@ -374,6 +403,10 @@
                             </filters>
                         </configuration>
                     </execution>
+                    <!--
+                       unix环境下拷贝一些rpm、deb安装的shell脚本
+                       将src/main/scripts/control拷贝到target/control
+                    -->
                     <execution>
                         <id>copy-control</id>
                         <phase>process-resources</phase>
@@ -393,6 +426,10 @@
                             </filters>
                         </configuration>
                     </execution>
+                    <!--
+                        unix环境下拷贝安装sh脚本
+                        将src/main/scripts/intall拷贝到target/bin/install下面
+                     -->
                     <execution>
                         <id>copy-install</id>
                         <phase>process-resources</phase>
@@ -416,6 +453,10 @@
                             </filters>
                         </configuration>
                     </execution>
+                    <!--
+                       windows环境下拷贝安装脚本，本质上和unix差不多，都是通过java执行的
+                       将src/main/scripts/windows拷贝到target/windows下面
+                    -->
                     <execution>
                         <id>copy-windows-control</id>
                         <phase>process-resources</phase>
@@ -435,6 +476,11 @@
                             </filters>
                         </configuration>
                     </execution>
+                    <!--
+                       拷贝windows的日志文件
+                       1. logback日志文件到src/main/script/install下面
+                       2. 过于繁琐，应该和上一步安装脚本合并，统一放install目录
+                    -->
                     <execution>
                         <id>copy-windows-install</id>
                         <phase>process-resources</phase>
@@ -457,6 +503,11 @@
                             </filters>
                         </configuration>
                     </execution>
+                    <!-- 拷贝sql数据脚本文件，unix和windows环境公用
+                         将src/main/data/和dao/src/main/resources/*.sql拷贝到target/data下面
+                         1. src/main/data里面有重要的widget模板文件
+                         2. dao下面是建库脚本
+                    -->
                     <execution>
                         <id>copy-data</id>
                         <phase>process-resources</phase>
@@ -482,6 +533,10 @@
                     </execution>
                 </executions>
             </plugin>
+            <!--
+                将springboot打包成windows的service服务
+                配合maven-assemly-plugin一起使用
+            -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -507,6 +562,7 @@
                     </execution>
                 </executions>
             </plugin>
+            <!-- 打包成普通的jar包 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -522,6 +578,12 @@
                     </archive>
                 </configuration>
             </plugin>
+            <!-- 在package阶段，打包成可执行的spring-boot包，三种启动方式
+               1. sh ./*.jar start
+               2. java -jar *.jar
+               3. mvn spring-boot:run
+               4. 开发环境用3，测试环境用2，生产环境用1
+            -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
@@ -546,6 +608,12 @@
                     </execution>
                 </executions>
             </plugin>
+            <!--
+              1. 打包rpm和deb,thingsboard自定义的插件,在package阶段执行
+              2. 源码工程里面没有这个插件，需要看源码可以直接上maven.aliyun.com上下载
+              3. 运行后会在target下生成.deb,.rpm两个unix安装文件
+              4. 打包过程比较费时，debug模式下可以注释
+            -->
             <plugin>
                 <groupId>org.thingsboard</groupId>
                 <artifactId>gradle-maven-plugin</artifactId>
@@ -574,6 +642,11 @@
                     </execution>
                 </executions>
             </plugin>
+            <!--
+                windows环境打包
+                1. 根据src/main/assembly/windows.xml描述文件将target/windows/目录进行打包
+                2. 打包之后会在target目录生成thingsboard-windows.zip
+            -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
@@ -593,6 +666,11 @@
                     </execution>
                 </executions>
             </plugin>
+            <!--
+               1. 调用install插件
+               2. 在package阶段调用install-file将deb安装到到本地仓库
+               3. install-file原本是在install阶段，提前到package阶段
+            -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-install-plugin</artifactId>
@@ -614,10 +692,14 @@
                     </execution>
                 </executions>
             </plugin>
+            <!-- 序列化插件,PRC需要用到 -->
             <plugin>
                 <groupId>org.xolstice.maven.plugins</groupId>
                 <artifactId>protobuf-maven-plugin</artifactId>
             </plugin>
+            <!-- 帮助插件
+               1. mvn help:env 查看properties系统属性
+            -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>

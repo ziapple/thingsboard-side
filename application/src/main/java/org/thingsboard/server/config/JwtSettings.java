@@ -19,6 +19,15 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.thingsboard.server.service.security.model.token.JwtToken;
 
+/**
+ * 读取yml文件中security的jwt属性
+ * # JWT Token parameters
+ *   jwt:
+ *     tokenExpirationTime token过期时间: "${JWT_TOKEN_EXPIRATION_TIME:9000}" # Number of seconds (2.5 hours)
+ *     refreshTokenExpTime token刷新时间，防止高并发下频繁生成token: "${JWT_REFRESH_TOKEN_EXPIRATION_TIME:604800}" # Number of seconds (1 week)
+ *     tokenIssuer token发行人: "${JWT_TOKEN_ISSUER:thingsboard.io}"
+ *     tokenSigningKey token签名Key: "${JWT_TOKEN_SIGNING_KEY:thingsboardDefaultSigningKey}"
+ */
 @Configuration
 @ConfigurationProperties(prefix = "security.jwt")
 public class JwtSettings {

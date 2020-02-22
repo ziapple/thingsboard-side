@@ -18,6 +18,10 @@ package org.thingsboard.server.config;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+/**
+ * web配置
+ * 不是以/api,/static,/webjars为根目录的url全部跳转到index.html
+ */
 @Controller
 public class WebConfig {
 

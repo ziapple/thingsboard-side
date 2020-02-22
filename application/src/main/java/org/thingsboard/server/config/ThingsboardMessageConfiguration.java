@@ -38,6 +38,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 
+/**
+ * 国际化配置
+ */
 @Configuration
 public class ThingsboardMessageConfiguration {
 

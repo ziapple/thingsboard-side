@@ -21,6 +21,20 @@ import org.springframework.context.annotation.Configuration;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 读取thingsboard.yml文件audit-log.logging-level的审计级别：关闭OFF，W写，RW读写
+ * # Allowed values: OFF (disable), W (log write operations), RW (log read and write operations)
+ *   logging-level:
+ *     mask:
+ *       "device": "${AUDIT_LOG_MASK_DEVICE:W}"
+ *       "asset": "${AUDIT_LOG_MASK_ASSET:W}"
+ *       "dashboard": "${AUDIT_LOG_MASK_DASHBOARD:W}"
+ *       "customer": "${AUDIT_LOG_MASK_CUSTOMER:W}"
+ *       "user": "${AUDIT_LOG_MASK_USER:W}"
+ *       "rule_chain": "${AUDIT_LOG_MASK_RULE_CHAIN:W}"
+ *       "alarm": "${AUDIT_LOG_MASK_ALARM:W}"
+ *       "entity_view": "${AUDIT_LOG_MASK_ENTITY_VIEW:W}"
+ */
 @Configuration
 @ConfigurationProperties(prefix = "audit-log.logging-level")
 public class AuditLogLevelProperties {

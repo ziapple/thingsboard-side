@@ -54,6 +54,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * SpringSecurity的核心配置，主要包括：
+ * 1. 配置用户登录的认证处理的过滤器：username、jwtToken、refreshToken、wsToken
+ * 2. 配置租户的并发请求限制过滤器，#{@link org.thingsboard.server.config.RateLimitProcessingFilter}
+ */
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled=true)
@@ -93,6 +98,13 @@ public class ThingsboardSecurityConfiguration extends WebSecurityConfigurerAdapt
 
     @Autowired private RateLimitProcessingFilter rateLimitProcessingFilter;
 
+    /**
+     * 用户名登录过滤器
+     * url:api/auth/login
+     * jsonbody:{username:,password:}
+     * @return
+     * @throws Exception
+     */
     @Bean
     protected RestLoginProcessingFilter buildRestLoginProcessingFilter() throws Exception {
         RestLoginProcessingFilter filter = new RestLoginProcessingFilter(FORM_BASED_LOGIN_ENTRY_POINT, successHandler, failureHandler, objectMapper);
@@ -100,6 +112,13 @@ public class ThingsboardSecurityConfiguration extends WebSecurityConfigurerAdapt
         return filter;
     }
 
+    /**
+     * publicID登录过滤器
+     * url:api/auth/login/public
+     * jsonbody:{publicId:,password:}
+     * @return
+     * @throws Exception
+     */
     @Bean
     protected RestPublicLoginProcessingFilter buildRestPublicLoginProcessingFilter() throws Exception {
         RestPublicLoginProcessingFilter filter = new RestPublicLoginProcessingFilter(PUBLIC_LOGIN_ENTRY_POINT, successHandler, failureHandler, objectMapper);
@@ -107,6 +126,11 @@ public class ThingsboardSecurityConfiguration extends WebSecurityConfigurerAdapt
         return filter;
     }
 
+    /**
+     * WebToken认证过滤器，用户登录后会在Header中生成Token，根据Token此过滤器会进行用户认证
+     * @return
+     * @throws Exception
+     */
     @Bean
     protected JwtTokenAuthenticationProcessingFilter buildJwtTokenAuthenticationProcessingFilter() throws Exception {
         List<String> pathsToSkip = new ArrayList(Arrays.asList(NON_TOKEN_BASED_AUTH_ENTRY_POINTS));
@@ -119,6 +143,12 @@ public class ThingsboardSecurityConfiguration extends WebSecurityConfigurerAdapt
         return filter;
     }
 
+    /**
+     * refreshToken过滤器
+     * 如果jwtToken过期，系统会校验refreshToken，校验通过会重新生成jwtToken
+     * @return
+     * @throws Exception
+     */
     @Bean
     protected RefreshTokenProcessingFilter buildRefreshTokenProcessingFilter() throws Exception {
         RefreshTokenProcessingFilter filter = new RefreshTokenProcessingFilter(TOKEN_REFRESH_ENTRY_POINT, successHandler, failureHandler, objectMapper);
@@ -126,6 +156,11 @@ public class ThingsboardSecurityConfiguration extends WebSecurityConfigurerAdapt
         return filter;
     }
 
+    /**
+     * 根据WebService中的JwtToken进行校验
+     * @return
+     * @throws Exception
+     */
     @Bean
     protected JwtTokenAuthenticationProcessingFilter buildWsJwtTokenAuthenticationProcessingFilter() throws Exception {
         AntPathRequestMatcher matcher = new AntPathRequestMatcher(WS_TOKEN_BASED_AUTH_ENTRY_POINT);
@@ -141,6 +176,11 @@ public class ThingsboardSecurityConfiguration extends WebSecurityConfigurerAdapt
         return super.authenticationManagerBean();
     }
 
+    /**
+     * 添加username、jwtToken、refreshToken的Authentication的权限生成器
+     * authenticationManager会根据provider提供的authentication进行校验
+     * @param auth
+     */
     @Override
     protected void configure(AuthenticationManagerBuilder auth) {
         auth.authenticationProvider(restAuthenticationProvider);
@@ -158,6 +198,14 @@ public class ThingsboardSecurityConfiguration extends WebSecurityConfigurerAdapt
         web.ignoring().antMatchers("/static/**");
     }
 
+    /**
+     * SpringSecurity初始化配置
+     * 1. 通过.antMatchers().permitAll()允许url访问
+     * 2. 添加username、jwtToken、refreshToken、wsToken四个用户认证过滤器
+     * 3. 增加了访问限制过滤器rateLimitProcessingFilter，可以限制租户的并发请求访问
+     * @param http
+     * @throws Exception
+     */
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.headers().cacheControl().and().frameOptions().disable()
@@ -193,6 +241,11 @@ public class ThingsboardSecurityConfiguration extends WebSecurityConfigurerAdapt
     }
 
 
+    /**
+     * 支持跨域Cors协议
+     * @param mvcCorsProperties
+     * @return
+     */
     @Bean
     @ConditionalOnMissingBean(CorsFilter.class)
     public CorsFilter corsFilter(@Autowired MvcCorsProperties mvcCorsProperties) {
