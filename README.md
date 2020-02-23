@@ -4,13 +4,14 @@
 - jdk1.8+
 - maven3
 - nodejs8+
+- git
 
 # 安装步骤
 ### Maven Install
+mvn clean install -DskipTests
 
-mvn clean install –DskipTests
-
-第一次安装时间比较长，我装了2个小时，安装完成如下
+第一次安装时间比较长，安装完成如下,
+如果安装时候报License错误，可以去掉pom下面的license-maven-plugin
 
 ![安装成功](./img/install-thingsboard-success.jpg)
 
@@ -83,7 +84,7 @@ C1客户下创建U1用户，客户C1可以使用U1用户进行登录，配置资
 创建D1设备，跟客户C1绑定，
 - 属性
  - 服务端属性，不填， 默认包括设备状态active，设备不活跃时刻inactiveAlarmTime，设备最后活跃时刻lastActiveTime，设备最后连接时刻lastConnectTime，设备最后失联时刻lastDisconnectTime
- - 客户端属性，不填，设备本地的属性，一般包括固件版本等属性
+ - 客户端属性，设备本地上传来的属性，设备json{key:value}上传的数据会自动识别出来作为客户端属性
  - 共享属性，不填
 - 最新遥测，自动显示设备最新上传的时序数据，例如huminity,temperature
 
@@ -117,6 +118,7 @@ C1客户下创建U1用户，客户C1可以使用U1用户进行登录，配置资
 - node mqtt/simulator-contral.js ${Token}
 - 添加Control Widget，选择温度
 
+<<<<<<< HEAD
 ## 基于ThingsBoard开发
 ### 开发框架2.5.0
 - SpringBoot 2.1.3.RELEASE
@@ -148,3 +150,8 @@ X-Authorization
 ## 如何学习ThingsBoard
 1. 直接通过源码学习还是比较费劲，穆书伟给我们提供了很好的学习TB[一系列教程](https://github.com/IoT-Technology/IOT-Technical-Guide)
 2. 通过教程首先的掌握COAP、MQTT这些协议
+### Mqtt客户端测试
+- 安装node.js,设置node的环境变量
+- 安装mqtt客户端
+  - cd ${NODE_PATH}, npm install mqtt,这样就可以使用mqtt批处理命令
+- [MQTT测试](mqtt/README.md)

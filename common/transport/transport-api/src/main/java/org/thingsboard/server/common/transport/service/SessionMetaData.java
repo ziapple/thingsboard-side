@@ -22,7 +22,12 @@ import org.thingsboard.server.gen.transport.TransportProtos;
 import java.util.concurrent.ScheduledFuture;
 
 /**
- * Created by ashvayka on 15.10.18.
+ * 会话元数据，包含：
+ * - 会话信息sessionInfo（会话id、设备id、租户id）
+ * - 会话类型sessionType（同步、异步）
+ * - 会话监听器（监听设备属性更新、发送RPC等事件）
+ * - 最后一次活动时间
+ * - 最后一次上报时间
  */
 @Data
 class SessionMetaData {

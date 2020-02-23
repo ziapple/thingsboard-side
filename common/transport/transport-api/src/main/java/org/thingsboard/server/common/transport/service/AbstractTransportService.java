@@ -33,7 +33,8 @@ import java.util.UUID;
 import java.util.concurrent.*;
 
 /**
- * Created by ashvayka on 17.10.18.
+ * 后端服务抽象类，通用做了几个工作
+ * 1. session会话的管理，初始化、更新（每个请求都会更新）、超时
  */
 @Slf4j
 public abstract class AbstractTransportService implements TransportService {
@@ -58,11 +59,23 @@ public abstract class AbstractTransportService implements TransportService {
     private ConcurrentMap<TenantId, TbRateLimits> perTenantLimits = new ConcurrentHashMap<>();
     private ConcurrentMap<DeviceId, TbRateLimits> perDeviceLimits = new ConcurrentHashMap<>();
 
+    /**
+     * 注册异步Session，AsyncSession不会销毁Session，但会定期检查Session，将过期的Session清除
+     * 同步SyncSession会在一个会话timeout之后注销Session
+     * @param sessionInfo
+     * @param listener
+     */
     @Override
     public void registerAsyncSession(TransportProtos.SessionInfoProto sessionInfo, SessionMsgListener listener) {
         sessions.putIfAbsent(toId(sessionInfo), new SessionMetaData(sessionInfo, TransportProtos.SessionType.ASYNC, listener));
     }
 
+    /**
+     * 处理Session事件，创建、
+     * @param sessionInfo
+     * @param msg
+     * @param callback
+     */
     @Override
     public void process(TransportProtos.SessionInfoProto sessionInfo, TransportProtos.SessionEventMsg msg, TransportServiceCallback<Void> callback) {
         if (checkLimits(sessionInfo, msg, callback)) {
@@ -158,6 +171,11 @@ public abstract class AbstractTransportService implements TransportService {
 
     protected abstract void registerClaimingInfo(TransportProtos.SessionInfoProto sessionInfo, TransportProtos.ClaimDeviceMsg msg, TransportServiceCallback<Void> callback);
 
+    /**
+     * 报告活动时间，更新会话最后一次活动时间
+     * @param sessionInfo
+     * @return
+     */
     private SessionMetaData reportActivityInternal(TransportProtos.SessionInfoProto sessionInfo) {
         UUID sessionId = toId(sessionInfo);
         SessionMetaData sessionMetaData = sessions.get(sessionId);
@@ -167,6 +185,9 @@ public abstract class AbstractTransportService implements TransportService {
         return sessionMetaData;
     }
 
+    /**
+     * 定期检查不活跃的会话，自动清理，init()方法里面定期执行此方法
+     */
     private void checkInactivityAndReportActivity() {
         long expTime = System.currentTimeMillis() - sessionInactivityTimeout;
         sessions.forEach((uuid, sessionMD) -> {
@@ -199,6 +220,13 @@ public abstract class AbstractTransportService implements TransportService {
         });
     }
 
+    /**
+     * 注册同步Session，初始化SessionMetaData，并且对超时的Session进行清理
+     * 同步Session会在timeout之后清理掉Session，异步Session不会自动清理
+     * @param sessionInfo
+     * @param listener
+     * @param timeout
+     */
     @Override
     public void registerSyncSession(TransportProtos.SessionInfoProto sessionInfo, SessionMsgListener listener, long timeout) {
         SessionMetaData currentSession = new SessionMetaData(sessionInfo, TransportProtos.SessionType.SYNC, listener);
@@ -212,6 +240,10 @@ public abstract class AbstractTransportService implements TransportService {
         currentSession.setScheduledFuture(executorFuture);
     }
 
+    /**
+     * 注销会话
+     * @param sessionInfo
+     */
     @Override
     public void deregisterSession(TransportProtos.SessionInfoProto sessionInfo) {
         SessionMetaData currentSession = sessions.get(toId(sessionInfo));
@@ -222,6 +254,13 @@ public abstract class AbstractTransportService implements TransportService {
         sessions.remove(toId(sessionInfo));
     }
 
+    /**
+     * 检查每个租户和每台设备的并发限制，在规定时间内（eg.1s）Mqtt消息请求一次算一次并发
+     * @param sessionInfo 会话信息
+     * @param msg         消息内容
+     * @param callback
+     * @return
+     */
     @Override
     public boolean checkLimits(TransportProtos.SessionInfoProto sessionInfo, Object msg, TransportServiceCallback<Void> callback) {
         if (log.isTraceEnabled()) {
@@ -231,6 +270,7 @@ public abstract class AbstractTransportService implements TransportService {
             return true;
         }
         TenantId tenantId = new TenantId(new UUID(sessionInfo.getTenantIdMSB(), sessionInfo.getTenantIdLSB()));
+        // 检查每个租户的并发限制
         TbRateLimits rateLimits = perTenantLimits.computeIfAbsent(tenantId, id -> new TbRateLimits(perTenantLimitsConf));
         if (!rateLimits.tryConsume()) {
             if (callback != null) {
@@ -241,6 +281,7 @@ public abstract class AbstractTransportService implements TransportService {
             }
             return false;
         }
+        // 检查每台设备的并发限制
         DeviceId deviceId = new DeviceId(new UUID(sessionInfo.getDeviceIdMSB(), sessionInfo.getDeviceIdLSB()));
         rateLimits = perDeviceLimits.computeIfAbsent(deviceId, id -> new TbRateLimits(perDevicesLimitsConf));
         if (!rateLimits.tryConsume()) {
