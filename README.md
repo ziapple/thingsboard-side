@@ -61,26 +61,21 @@ java -jar application/thingsboard-boot.jar
 
 ## 操作流程
 ### 使用默认系统管理员登陆系统创建租户管理员，使用默认系统账户登陆：
-
 Systen Administrator: sysadmin@thingsboard.org / sysadmin
 
 租户->创建租户->创建租户管理员T1->使用租户管理员登陆TB系统
 
-
 ### 使用租户管理员创建客户
-
 新增一个“C1客户”，属性、最新遥测、警告、事件、关联、审计日志这几个是客户、资产、设备共用的模板，客户一般不用填写
 
 C1客户下创建U1用户，客户C1可以使用U1用户进行登录，配置资产和设备，为了方便，统一在T1下进行配置C1客户设备，配置完后用U1登录看到的是一样的
 
 ### 创建资产
-
 创建资产“资产大夏”，跟客户C1绑定
 
 一般应用需要在地图上显示资产位置（使用DashBoard的仪表插件Maps），可以添加自定义精度和维度属性，指定为服务器属性
 
 ### 创建设备
-
 创建D1设备，跟客户C1绑定，
 - 属性
  - 服务端属性，不填， 默认包括设备状态active，设备不活跃时刻inactiveAlarmTime，设备最后活跃时刻lastActiveTime，设备最后连接时刻lastConnectTime，设备最后失联时刻lastDisconnectTime
@@ -89,7 +84,6 @@ C1客户下创建U1用户，客户C1可以使用U1用户进行登录，配置资
 - 最新遥测，自动显示设备最新上传的时序数据，例如huminity,temperature
 
 ### 实体视图
-
 创建E1，跟客户C1绑定
 - 目标实体，选择设备，选择D1
 - 属性传播，不填
@@ -106,11 +100,9 @@ C1客户下创建U1用户，客户C1可以使用U1用户进行登录，配置资
 - 双击要使用的图表->点击添加数据源->选择之前创建的实体->选择具体数据字段（数据来源于下一步MQTT发送来的数据，可以先跳过）->添加
 
 ### 导入部件库
-
 部件库->导入，选择application/src/main/resources/data/json/system/widget_bundles,需要用管理员账号导入 
 
 ### 发送设备数据
-
 - http方式，http curl -v -X POST -d @telemetry-data-as-object.json http://localhost:8080/api/v1/$ACCESS_TOKEN/telemetry --header "Content-Type:application/json"
 - mqtt方式，node mqtt/simulaor.js ${Token} eg. qgzyQEtnHrrLcO6Z5Ya0
 
@@ -118,7 +110,6 @@ C1客户下创建U1用户，客户C1可以使用U1用户进行登录，配置资
 - node mqtt/simulator-contral.js ${Token}
 - 添加Control Widget，选择温度
 
-<<<<<<< HEAD
 ## 基于ThingsBoard开发
 ### 开发框架2.5.0
 - SpringBoot 2.1.3.RELEASE
@@ -142,16 +133,15 @@ C1客户下创建U1用户，客户C1可以使用U1用户进行登录，配置资
 
 ## API测试
 - 所有API地址:http://localhost:8080/swagger-ui.html
-- 登录API,/api/auth/login,拿到token放到header中可以调用所有API,header如下：
-```shell script
-X-Authorization
-```
+- 登录API,/api/auth/login,拿到token放到header中可以调用所有API
+- [HTTP测试](mqtt/README.md)
+
+## Mqtt客户端测试
+- 安装node.js,设置node的环境变量￿ø
+- 安装mqtt客户端
+  - cd ${NODE_PATH}, npm install mqtt,这样就可以使用mqtt批处理命令
+- [MQTT测试](mqtt/README.md)
 
 ## 如何学习ThingsBoard
 1. 直接通过源码学习还是比较费劲，穆书伟给我们提供了很好的学习TB[一系列教程](https://github.com/IoT-Technology/IOT-Technical-Guide)
 2. 通过教程首先的掌握COAP、MQTT这些协议
-### Mqtt客户端测试
-- 安装node.js,设置node的环境变量
-- 安装mqtt客户端
-  - cd ${NODE_PATH}, npm install mqtt,这样就可以使用mqtt批处理命令
-- [MQTT测试](mqtt/README.md)

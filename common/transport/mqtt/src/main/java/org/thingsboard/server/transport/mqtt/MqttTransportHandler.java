@@ -81,7 +81,7 @@ import static io.netty.handler.codec.mqtt.MqttQoS.AT_MOST_ONCE;
 import static io.netty.handler.codec.mqtt.MqttQoS.FAILURE;
 
 /**
- * @author Andrew Shvayka
+ * MQTT消息的协议处理器，解析MQTT协议，交给{@code TransportService}处理
  */
 @Slf4j
 public class MqttTransportHandler extends ChannelInboundHandlerAdapter implements GenericFutureListener<Future<? super Void>>, SessionMsgListener {
@@ -252,6 +252,13 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
         }
     }
 
+    /**
+     * 处理设备publish推送的消息
+     * @param ctx
+     * @param mqttMsg
+     * @param topicName
+     * @param msgId
+     */
     private void processDevicePublish(ChannelHandlerContext ctx, MqttPublishMessage mqttMsg, String topicName, int msgId) {
         try {
             if (topicName.equals(MqttTopics.DEVICE_TELEMETRY_TOPIC)) {// 时序数据

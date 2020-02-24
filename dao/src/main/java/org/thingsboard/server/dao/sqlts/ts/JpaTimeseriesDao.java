@@ -62,6 +62,9 @@ import java.util.stream.Collectors;
 import static org.thingsboard.server.common.data.UUIDConverter.fromTimeUUID;
 
 
+/**
+ * 时序数据Dao
+ */
 @Component
 @Slf4j
 @SqlTsDao

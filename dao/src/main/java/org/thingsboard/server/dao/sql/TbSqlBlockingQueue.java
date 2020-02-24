@@ -31,16 +31,26 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+/**
+ * 一个执行SQL语句写的阻塞队列
+ * 所有设备时序数据都在阻塞队列进行写入
+ * @param <E>
+ */
 @Slf4j
 public class TbSqlBlockingQueue<E> implements TbSqlQueue<E> {
-
+    // 要写入的Entity阻塞队列
     private final BlockingQueue<TbSqlQueueElement<E>> queue = new LinkedBlockingQueue<>();
+    // 当前队列新增的记录
     private final AtomicInteger addedCount = new AtomicInteger();
+    // 当前队列成功保存到数据库的记录
     private final AtomicInteger savedCount = new AtomicInteger();
+    // 当前队列失败写入数据库的记录，注：写入数据是批处理的，要么成功，要么失败
     private final AtomicInteger failedCount = new AtomicInteger();
+    // 阻塞队列参数，规定写入最大延迟事件maxDelay，队列大小batchSize
     private final TbSqlBlockingQueueParams params;
-
+    // 队列任务线程执行器
     private ExecutorService executor;
+    // 定时打印日志任务线程
     private ScheduledLogExecutorComponent logExecutor;
 
     public TbSqlBlockingQueue(TbSqlBlockingQueueParams params) {
@@ -59,18 +69,24 @@ public class TbSqlBlockingQueue<E> implements TbSqlQueue<E> {
             while (!Thread.interrupted()) {
                 try {
                     long currentTs = System.currentTimeMillis();
+                    // 获取队列元素，队列为空时返回null
                     TbSqlQueueElement<E> attr = queue.poll(maxDelay, TimeUnit.MILLISECONDS);
                     if (attr == null) {
                         continue;
                     } else {
                         entities.add(attr);
                     }
+                    // 从队列里面一次性拿出
                     queue.drainTo(entities, batchSize - 1);
                     boolean fullPack = entities.size() == batchSize;
                     log.debug("[{}] Going to save {} entities", logName, entities.size());
+                    // 保存实体类（时序数据），把List<Entity>作为参数传过去批处理保存，保存方法在{@code JpaTimeserisDao}中实现
                     saveFunction.accept(entities.stream().map(TbSqlQueueElement::getEntity).collect(Collectors.toList()));
+                    // 设置entities的Future返回值为null
                     entities.forEach(v -> v.getFuture().set(null));
+                    // 记录保存成功的实体数量
                     savedCount.addAndGet(entities.size());
+                    // 控制每个批次保存时间在maxDelay以内
                     if (!fullPack) {
                         long remainingDelay = maxDelay - (System.currentTimeMillis() - currentTs);
                         if (remainingDelay > 0) {
@@ -79,6 +95,7 @@ public class TbSqlBlockingQueue<E> implements TbSqlQueue<E> {
                     }
                 } catch (Exception e) {
                     failedCount.addAndGet(entities.size());
+                    // 设置entity执行失败的异常
                     entities.forEach(entityFutureWrapper -> entityFutureWrapper.getFuture().setException(e));
                     if (e instanceof InterruptedException) {
                         log.info("[{}] Queue polling was interrupted", logName);
@@ -92,6 +109,7 @@ public class TbSqlBlockingQueue<E> implements TbSqlQueue<E> {
             }
         });
 
+        // 定期清楚计数器，防止溢出
         logExecutor.scheduleAtFixedRate(() -> {
             if (queue.size() > 0 || addedCount.get() > 0 || savedCount.get() > 0 || failedCount.get() > 0) {
                 log.info("[{}] queueSize [{}] totalAdded [{}] totalSaved [{}] totalFailed [{}]",

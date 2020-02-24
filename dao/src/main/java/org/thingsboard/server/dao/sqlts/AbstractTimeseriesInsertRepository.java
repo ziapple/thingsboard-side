@@ -21,6 +21,10 @@ import org.thingsboard.server.dao.model.sql.AbstractTsKvEntity;
 
 import java.util.List;
 
+/**
+ * 时序数据写入抽象类
+ * @param <T>
+ */
 @Repository
 public abstract class AbstractTimeseriesInsertRepository<T extends AbstractTsKvEntity> extends AbstractInsertRepository {
 

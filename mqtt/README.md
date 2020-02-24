@@ -5,6 +5,7 @@
 1. 推送时序消息, 注意$ACCESS_TOKEN不需要单引号，在设备->最新遥测会显示
 ```shell script
 mqtt pub -v -h "127.0.0.1" -t "v1/devices/me/telemetry" -u '$ACCESS_TOKEN' -m {'key':'value'}
+mqtt pub -v -h "127.0.0.1" -t "v1/devices/me/telemetry" -u 'qgzyQEtnHrrLcO6Z5Ya0' -m {'temperatrue':'38.4'}
 ```
 2. 发送设备客户端属性，在设备的属性->客户端属性会显示出来
 ```shell script
@@ -12,7 +13,7 @@ mqtt pub -d -h "127.0.0.1" -t "v1/devices/me/attributes" -u '$ACCESS_TOKEN' -m {
 ```
 3. 获取设备属性
 ```jshelllanguage
-var mqtt = require('mqtt')
+var mqtt = require('mqtt');
 var client  = mqtt.connect('mqtt://127.0.0.1',{
     username: process.env.TOKEN
 })
@@ -85,16 +86,34 @@ client.on('message', function (topic, message) {
 HTTP测试
 - 工具 PostMan
 - API清单，访问swagger-ui.html
-- 获取Token，[登录URL](http://localhost:8080/api/auth/login)
+- 获取用户Token
+```shell script
+curl -X POST -d '{"username":"ziapple@126.com","password":"123456"}' -H 'Content-Type:application/json' http://localhost:8080/api/auth/login
 ```
-{
-    "username":"ziapple@126.com",
-	"password":"zp150719"
-}
+- 获取客户ID
+```html
+curl -X GET -H 'X-Authorization:Bearer ${JWT_TOKEN}' http://localhost:8080/api/customers?limit=10
 ```
-- 获取设备属性
-[属性URL](http://localhost:8080/api/plugins/telemetry/DEVICE/68da06a0-538b-11ea-8aa0-2be100bc01b3/values/attributes)
-header中添加X-Authorization,value：Bearer ${JWT_TOKEN}
+- 根据客户Id获取设备Id
+```html
+curl -X GET -H 'X-Authorization:Bearer ${JWT_TOKEN}' http://localhost:8080/api/customer/${customerId}/devices?limit=10
+```
+- 根据设备Id获取设备Token
+```html
+curl -X GET -H 'X-Authorization:Bearer ${JWT_TOKEN}' http://localhost:8080/api/device/{deviceId}/credentials
+```
+我添加的设备
+```html
+curl -X GET -H 'X-Authorization:Bearer ${JWT_TOKEN}' http://localhost:8080/api/device/5d971870-40ab-11ea-b396-e3f7671d4bba/credentials
+```
+- 获取客户端属性
+```html
+curl -X GET -H 'X-Authorization:Bearer ${JWT_TOKEN}' http://localhost:8080/api/v1/{deviceToken}/attributes
+```
 - 获取设备时序数据
-[URL](http://localhost:8080/api/plugins/telemetry/DEVICE/68da06a0-538b-11ea-8aa0-2be100bc01b3/values/timeseries?limit=100&interval=1&startTs=1582128000&entTs=1582128000)
-?limit=10&interval=2
+```html
+curl -X GET -H 'X-Authorization:Bearer ${JWT_TOKEN}' http://localhost:8080/api/plugins/telemetry/DEVICE/5d971870-40ab-11ea-b396-e3f7671d4bba/values/timeseries?limit=100&interval=1&startTs=1582128000&entTs=1582128000
+```
+
+
+
