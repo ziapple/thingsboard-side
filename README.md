@@ -3,7 +3,7 @@
 2. 参考CSDN[CSDN博客](https://blog.csdn.net/ieflex/article/details/97106750)
 - jdk1.8+
 - maven3
-- nodejs8+
+- nodejs10.16.0,npm6.4.1
 - git
 
 # 安装步骤
