@@ -23,6 +23,7 @@ import io.github.bucket4j.local.LocalBucketBuilder;
 import java.time.Duration;
 
 /**
+ * 并发限制，漏洞原理
  * Created by ashvayka on 22.10.18.
  */
 public class TbRateLimits {

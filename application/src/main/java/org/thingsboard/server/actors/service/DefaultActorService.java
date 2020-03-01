@@ -95,6 +95,11 @@ public class DefaultActorService implements ActorService {
 
     private ActorRef rpcManagerActor;
 
+    /**
+     * 初始化ActorSystem
+     * 1. 创建AppActor、RPCMangerActor、StatsActor三个核心的Actor
+     * 2. 启动RPC服务，调用{@code ClusterGrpcService}
+     */
     @PostConstruct
     public void initActorSystem() {
         log.info("Initializing Actor system.");
@@ -115,12 +120,19 @@ public class DefaultActorService implements ActorService {
         log.info("Actor system initialized.");
     }
 
+    /**
+     * SpringApplication初始化后，发送AppInitMsg消息给AppActor
+     * @param applicationReadyEvent
+     */
     @EventListener(ApplicationReadyEvent.class)
     public void onApplicationEvent(ApplicationReadyEvent applicationReadyEvent) {
         log.info("Received application ready event. Sending application init message to actor system");
         appActor.tell(new AppInitMsg(), ActorRef.noSender());
     }
 
+    /**
+     * 关闭ActorSystem
+     */
     @PreDestroy
     public void stopActorSystem() {
         Future<Terminated> status = system.terminate();
@@ -196,6 +208,9 @@ public class DefaultActorService implements ActorService {
     private final AtomicInteger receivedClusterMsgs = new AtomicInteger(0);
 
 
+    /**
+     * 定期打印收到和发送给Cluster的消息
+     */
     @Scheduled(fixedDelayString = "${cluster.stats.print_interval_ms}")
     public void printStats() {
         if (statsEnabled) {

@@ -54,6 +54,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * 接收设备端发来的消息
+ * 1. 从{@code LocalTranportService}接收到的Mqtt消息全部交给AppActor处理
+ */
 public class AppActor extends RuleChainManagerActor {
 
     private static final TenantId SYSTEM_TENANT = new TenantId(ModelConstants.NULL_UUID);
@@ -100,6 +104,7 @@ public class AppActor extends RuleChainManagerActor {
             case SERVICE_TO_RULE_ENGINE_MSG:
                 onServiceToRuleEngineMsg((ServiceToRuleEngineMsg) msg);
                 break;
+            // 以下所有消息由onToDeviceActorMsg处理
             case TRANSPORT_TO_DEVICE_ACTOR_MSG:
             case DEVICE_ATTRIBUTES_UPDATE_TO_DEVICE_ACTOR_MSG:
             case DEVICE_CREDENTIALS_UPDATE_TO_DEVICE_ACTOR_MSG:
@@ -115,6 +120,9 @@ public class AppActor extends RuleChainManagerActor {
         return true;
     }
 
+    /**
+     * 初始化RuleChainActor和TenantActor
+     */
     private void initRuleChainsAndTenantActors() {
         log.info("Starting main system actor.");
         try {
@@ -182,6 +190,11 @@ public class AppActor extends RuleChainManagerActor {
         }
     }
 
+    /**
+     * 设备AppActor转发给TenantActor
+     * MqttTransportHandler -> LocalTransportService.process -> AppActor -> TenantActor
+     * @param msg
+     */
     private void onToDeviceActorMsg(TenantAwareMsg msg) {
         getOrCreateTenantActor(msg.getTenantId()).tell(msg, ActorRef.noSender());
     }

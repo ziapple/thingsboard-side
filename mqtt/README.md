@@ -1,7 +1,7 @@
 # Mqtt客户端测试
 - 安装node.js,设置node的环境变量
 - 安装mqtt客户端
-  - cd ${NODE_PATH}, npm install mqtt,这样就可以使用mqtt批处理命令
+  - npm install mqtt -g,这样就可以使用mqtt批处理命令
 1. 推送时序消息, 注意$ACCESS_TOKEN不需要单引号，在设备->最新遥测会显示
 ```shell script
 mqtt pub -v -h "127.0.0.1" -t "v1/devices/me/telemetry" -u '$ACCESS_TOKEN' -m {'key':'value'}

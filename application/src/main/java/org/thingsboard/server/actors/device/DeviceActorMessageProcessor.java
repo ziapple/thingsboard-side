@@ -88,6 +88,8 @@ import static org.thingsboard.server.common.data.DataConstants.CLIENT_SCOPE;
 import static org.thingsboard.server.common.data.DataConstants.SHARED_SCOPE;
 
 /**
+ * 处理设备消息核心类，设备消息处理器
+ * 他将设备消息转发给规则引擎
  * @author Andrew Shvayka
  */
 @Slf4j

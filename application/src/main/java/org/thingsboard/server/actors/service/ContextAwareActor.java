@@ -23,6 +23,10 @@ import org.thingsboard.server.actors.ActorSystemContext;
 import org.thingsboard.server.common.msg.TbActorMsg;
 
 
+/**
+ * 包含了Actor上下文的抽象类，所有用户的Actor继承此类
+ * Actor子类必须实现process方法，对Actor消息进行处理
+ */
 public abstract class ContextAwareActor extends UntypedActor {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());

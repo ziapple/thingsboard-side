@@ -60,6 +60,7 @@ import java.util.stream.Collectors;
 import static org.apache.curator.framework.recipes.cache.PathChildrenCacheEvent.Type.CHILD_REMOVED;
 
 /**
+ * 通过Zookeeper来注册RPCServer，启动Thingsboard的集群服务
  * @author Andrew Shvayka
  */
 @Service

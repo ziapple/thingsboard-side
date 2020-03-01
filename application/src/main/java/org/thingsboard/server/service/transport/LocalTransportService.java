@@ -102,6 +102,11 @@ public class LocalTransportService extends AbstractTransportService implements R
         super.destroy();
     }
 
+    /**
+     * 处理验证设备Token的消息
+     * @param msg
+     * @param callback
+     */
     @Override
     public void process(ValidateDeviceTokenRequestMsg msg, TransportServiceCallback<ValidateDeviceCredentialsResponseMsg> callback) {
         DonAsynchron.withCallback(
@@ -114,6 +119,11 @@ public class LocalTransportService extends AbstractTransportService implements R
                 getThrowableConsumer(callback), transportCallbackExecutor);
     }
 
+    /**
+     * 处理验证设备证书的消息
+     * @param msg
+     * @param callback
+     */
     @Override
     public void process(ValidateDeviceX509CertRequestMsg msg, TransportServiceCallback<ValidateDeviceCredentialsResponseMsg> callback) {
         DonAsynchron.withCallback(
@@ -138,31 +148,69 @@ public class LocalTransportService extends AbstractTransportService implements R
                 getThrowableConsumer(callback), transportCallbackExecutor);
     }
 
+    /**
+     * 处理Sessioin会话事件消息
+     * 0-Open
+     * 1-Close
+     * @param sessionInfo
+     * @param msg
+     * @param callback
+     */
     @Override
     protected void doProcess(SessionInfoProto sessionInfo, SessionEventMsg msg, TransportServiceCallback<Void> callback) {
         forwardToDeviceActor(TransportToDeviceActorMsg.newBuilder().setSessionInfo(sessionInfo).setSessionEvent(msg).build(), callback);
     }
 
+    /**
+     * 处理设备时序数据发送消息
+     * @param sessionInfo
+     * @param msg
+     * @param callback
+     */
     @Override
     protected void doProcess(SessionInfoProto sessionInfo, PostTelemetryMsg msg, TransportServiceCallback<Void> callback) {
         forwardToDeviceActor(TransportToDeviceActorMsg.newBuilder().setSessionInfo(sessionInfo).setPostTelemetry(msg).build(), callback);
     }
 
+    /**
+     * 处理设备属性消息
+     * @param sessionInfo
+     * @param msg
+     * @param callback
+     */
     @Override
     protected void doProcess(SessionInfoProto sessionInfo, PostAttributeMsg msg, TransportServiceCallback<Void> callback) {
         forwardToDeviceActor(TransportToDeviceActorMsg.newBuilder().setSessionInfo(sessionInfo).setPostAttributes(msg).build(), callback);
     }
 
+    /**
+     * 获取设备属性数据
+     * @param sessionInfo
+     * @param msg
+     * @param callback
+     */
     @Override
     protected void doProcess(SessionInfoProto sessionInfo, GetAttributeRequestMsg msg, TransportServiceCallback<Void> callback) {
         forwardToDeviceActor(TransportToDeviceActorMsg.newBuilder().setSessionInfo(sessionInfo).setGetAttributes(msg).build(), callback);
     }
 
+    /**
+     * 订阅RPC
+     * @param sessionInfo
+     * @param msg
+     * @param callback
+     */
     @Override
     public void process(SessionInfoProto sessionInfo, TransportProtos.SubscriptionInfoProto msg, TransportServiceCallback<Void> callback) {
         forwardToDeviceActor(TransportToDeviceActorMsg.newBuilder().setSessionInfo(sessionInfo).setSubscriptionInfo(msg).build(), callback);
     }
 
+    /**
+     * 订阅属性更新
+     * @param sessionInfo
+     * @param msg
+     * @param callback
+     */
     @Override
     protected void doProcess(SessionInfoProto sessionInfo, SubscribeToAttributeUpdatesMsg msg, TransportServiceCallback<Void> callback) {
         forwardToDeviceActor(TransportToDeviceActorMsg.newBuilder().setSessionInfo(sessionInfo).setSubscribeToAttributes(msg).build(), callback);
@@ -173,11 +221,23 @@ public class LocalTransportService extends AbstractTransportService implements R
         forwardToDeviceActor(TransportToDeviceActorMsg.newBuilder().setSessionInfo(sessionInfo).setSubscribeToRPC(msg).build(), callback);
     }
 
+    /**
+     * 给设备发送给RPC反馈
+     * @param sessionInfo
+     * @param msg
+     * @param callback
+     */
     @Override
     protected void doProcess(SessionInfoProto sessionInfo, ToDeviceRpcResponseMsg msg, TransportServiceCallback<Void> callback) {
         forwardToDeviceActor(TransportToDeviceActorMsg.newBuilder().setSessionInfo(sessionInfo).setToDeviceRPCCallResponse(msg).build(), callback);
     }
 
+    /**
+     * 发送Server端RPC请求
+     * @param sessionInfo
+     * @param msg
+     * @param callback
+     */
     @Override
     protected void doProcess(SessionInfoProto sessionInfo, ToServerRpcRequestMsg msg, TransportServiceCallback<Void> callback) {
         forwardToDeviceActor(TransportToDeviceActorMsg.newBuilder().setSessionInfo(sessionInfo).setToServerRPCCallRequest(msg).build(), callback);
@@ -213,6 +273,13 @@ public class LocalTransportService extends AbstractTransportService implements R
         }
     }
 
+    /**
+     * 交给Actor分布式处理消息
+     * 1. 如果是zk的cluster集群，调用rpcService
+     * 2. 非集群模式，调用AppActor{@code AppActor},MsgType为TRANSPORT_TO_DEVICE_ACTOR_MSG
+     * @param toDeviceActorMsg
+     * @param callback
+     */
     private void forwardToDeviceActor(TransportToDeviceActorMsg toDeviceActorMsg, TransportServiceCallback<Void> callback) {
         TransportToDeviceActorMsgWrapper wrapper = new TransportToDeviceActorMsgWrapper(toDeviceActorMsg);
         Optional<ServerAddress> address = routingService.resolveById(wrapper.getDeviceId());

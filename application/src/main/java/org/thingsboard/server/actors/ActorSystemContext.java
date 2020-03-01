@@ -92,13 +92,21 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Actor系统上下文
+ * 1. 包含租户、设备、资产等Service
+ * 2. 保存Node节点Debug调试事件
+ * 3. 定期打印JsInvoke请求数量、成功和失败数量
+ */
 @Slf4j
 @Component
 public class ActorSystemContext {
     private static final String AKKA_CONF_FILE_NAME = "actor-system.conf";
 
+    //Json转化器
     protected final ObjectMapper mapper = new ObjectMapper();
 
+    //租户请求的可以调试的节点并发限制
     private final ConcurrentMap<TenantId, DebugTbRateLimits> debugPerTenantLimits = new ConcurrentHashMap<>();
 
     public ConcurrentMap<TenantId, DebugTbRateLimits> getDebugPerTenantLimits() {
@@ -431,6 +439,15 @@ public class ActorSystemContext {
         persistDebugAsync(tenantId, entityId, "OUT", tbMsg, relationType, null);
     }
 
+    /**
+     * 异步保存Debug调试信息
+     * @param tenantId  租户Id
+     * @param entityId  实体Id
+     * @param type
+     * @param tbMsg
+     * @param relationType
+     * @param error
+     */
     private void persistDebugAsync(TenantId tenantId, EntityId entityId, String type, TbMsg tbMsg, String relationType, Throwable error) {
         if (checkLimits(tenantId, tbMsg, error)) {
             try {
@@ -476,13 +493,21 @@ public class ActorSystemContext {
         }
     }
 
+    /**
+     * 检查规则链所有的Node的Debug下的并发限制
+     * @param tenantId
+     * @param tbMsg
+     * @param error
+     * @return
+     */
     private boolean checkLimits(TenantId tenantId, TbMsg tbMsg, Throwable error) {
         if (debugPerTenantEnabled) {
             DebugTbRateLimits debugTbRateLimits = debugPerTenantLimits.computeIfAbsent(tenantId, id ->
                     new DebugTbRateLimits(new TbRateLimits(debugPerTenantLimitsConfiguration), false));
 
+            // 达到并发限制
             if (!debugTbRateLimits.getTbRateLimits().tryConsume()) {
-                if (!debugTbRateLimits.isRuleChainEventSaved()) {
+                if (!debugTbRateLimits.isRuleChainEventSaved()) {// 只保存一次告警
                     persistRuleChainDebugModeEvent(tenantId, tbMsg.getRuleChainId(), error);
                     debugTbRateLimits.setRuleChainEventSaved(true);
                 }
@@ -495,6 +520,12 @@ public class ActorSystemContext {
         return true;
     }
 
+    /**
+     * 达到并发限制，保存告警事件
+     * @param tenantId 租户Id
+     * @param entityId 实体Id
+     * @param error
+     */
     private void persistRuleChainDebugModeEvent(TenantId tenantId, EntityId entityId, Throwable error) {
         Event event = new Event();
         event.setTenantId(tenantId);

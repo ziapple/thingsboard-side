@@ -27,6 +27,9 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * 模拟的服务调度器
+ * 1. zk.enabled=false，调用的是本地的RPC，localhost:9001
+ * 2. zk.enabled=true，调用{@ZkDiscoveryService}，真正的集群RPC调度器
  * @author Andrew Shvayka
  */
 @Service

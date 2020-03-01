@@ -27,6 +27,8 @@ import javax.annotation.PostConstruct;
 import static org.thingsboard.server.utils.MiscUtils.missingProperty;
 
 /**
+ * 当前RPC服务实例
+ * 默认为localhost:9001
  * @author Andrew Shvayka
  */
 @Service

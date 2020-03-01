@@ -28,6 +28,22 @@ import java.io.Serializable;
 import java.util.UUID;
 
 /**
+ * Transport接受到消息后传输给Actor系统的消息封装
+ * 1. TbActorMsg，获取消息类型接口
+ * 2. DeviceAwareMsg，获取设备Id接口
+ * 3. TenantAwareMsg，获取租户Id接口
+ * 4. TransportToDeviceActorMsg的消息格式如下：
+ *   SessionInfoProto sessionInfo = 1;    Session信息，包含SessionId，设备和租户Id
+ *   SessionEventMsg sessionEvent = 2;    Session事件类型，Open或者Closed
+ *   PostTelemetryMsg postTelemetry = 3;  时序数据
+ *   PostAttributeMsg postAttributes = 4;
+ *   GetAttributeRequestMsg getAttributes = 5;
+ *   SubscribeToAttributeUpdatesMsg subscribeToAttributes = 6;
+ *   SubscribeToRPCMsg subscribeToRPC = 7;
+ *   ToDeviceRpcResponseMsg toDeviceRPCCallResponse = 8;
+ *   ToServerRpcRequestMsg toServerRPCCallRequest = 9;
+ *   SubscriptionInfoProto subscriptionInfo = 10;
+ *   ClaimDeviceMsg claimDevice = 11;
  * Created by ashvayka on 09.10.18.
  */
 @Data
