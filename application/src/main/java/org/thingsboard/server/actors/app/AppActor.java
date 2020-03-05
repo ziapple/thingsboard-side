@@ -199,6 +199,11 @@ public class AppActor extends RuleChainManagerActor {
         getOrCreateTenantActor(msg.getTenantId()).tell(msg, ActorRef.noSender());
     }
 
+    /**
+     * 生成tenantActor，一个租户(tenantId)一个actor实例
+     * @param tenantId
+     * @return
+     */
     private ActorRef getOrCreateTenantActor(TenantId tenantId) {
         return tenantActors.computeIfAbsent(tenantId, k -> {
             log.debug("[{}] Creating tenant actor.", tenantId);

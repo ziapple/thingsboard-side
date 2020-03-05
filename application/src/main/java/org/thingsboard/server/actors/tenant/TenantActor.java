@@ -152,6 +152,11 @@ public class TenantActor extends RuleChainManagerActor {
         }
     }
 
+    /**
+     * 获得设备actor，一个设备(deviceId)对应一个DeviceActor
+     * @param deviceId
+     * @return
+     */
     private ActorRef getOrCreateDeviceActor(DeviceId deviceId) {
         return deviceActors.computeIfAbsent(deviceId, k -> {
             log.debug("[{}][{}] Creating device actor.", tenantId, deviceId);

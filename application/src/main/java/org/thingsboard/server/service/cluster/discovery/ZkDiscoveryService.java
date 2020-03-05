@@ -60,7 +60,12 @@ import java.util.stream.Collectors;
 import static org.apache.curator.framework.recipes.cache.PathChildrenCacheEvent.Type.CHILD_REMOVED;
 
 /**
- * 通过Zookeeper来注册RPCServer，启动Thingsboard的集群服务
+ * 通过Zookeeper启动Thingsboard的集群服务
+ * 1. zk在/nodes下注册维护所有的集群节点Id
+ * 2. 集群节点是对等的，任何一个集群节点都可以接收前端的http、mqtt、coap请求
+ * 3. 集群的前端负载thingsboard没有做，可以通过nginx来做
+ * 4. 集群本身互相通讯靠的是actor(服务器之前通讯又是靠rpc机制），thingsboard自己实现了一个actor集群
+ * 5. 每个节点都是一个rpc服务器，也是一个actor服务器，所以actor的消息都要封装成protof格式
  * @author Andrew Shvayka
  */
 @Service

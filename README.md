@@ -4,7 +4,7 @@
 - jdk1.8+
 - maven3
 - nodejs10.16.0,npm6.4.1
-- git
+- zookeeper3.5.X remote模式，zkServer必须是3.5+以上，否则启动报错
 
 # 安装步骤
 ### Maven Install
