@@ -4,6 +4,8 @@ var mqtt = require('mqtt');
 const thingsboardHost = "localhost";
 // Reads the access token from arguments
 const accessToken = process.argv[2];
+// 读取发送时间间隔
+const interval = process.argv[3] == null ? 1000 : process.argv[3] * 1000;
 const minTemperature = 17.5, maxTemperature = 30, minHumidity = 12, maxHumidity = 90;
  
 // Initialization of temperature and humidity data with random values
@@ -22,8 +24,8 @@ client.on('connect', function () {
     // Uploads firmware version as device attribute using 'v1/devices/me/attributes' MQTT topic
     client.publish('v1/devices/me/attributes', JSON.stringify({"firmware_version":"1.0.1"}));
     // Schedules telemetry data upload once per second
-    console.log('Uploading temperature and humidity data once per second...');
-    setInterval(publishTelemetry, 1000);
+    console.log('Uploading temperature and humidity data once per ' + interval/1000 + ' second...');
+    setInterval(publishTelemetry, interval);
 });
  
 // Uploads telemetry data using 'v1/devices/me/telemetry' MQTT topic

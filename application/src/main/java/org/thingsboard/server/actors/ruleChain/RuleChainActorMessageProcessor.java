@@ -54,6 +54,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
+ * 规则链Actor处理器
+ * 1. Device发送的消息初始化给firstNode->Input节点进行处理
+ * 2. firstNode执行tellNext对消息进行转发
  * @author Andrew Shvayka
  */
 @Slf4j
@@ -87,6 +90,12 @@ public class RuleChainActorMessageProcessor extends ComponentMsgProcessor<RuleCh
         return null;
     }
 
+    /**
+     * 初始化规则链
+     * 1. 初始化租户规则链的第一个起始节点RuleNode
+     * 2. 初始化起始节点的nodeActor
+     * @param context
+     */
     @Override
     public void start(ActorContext context) {
         if (!started) {
@@ -164,6 +173,11 @@ public class RuleChainActorMessageProcessor extends ComponentMsgProcessor<RuleCh
                         .withDispatcher(dispatcherName), ruleNode.getId().toString());
     }
 
+    /**
+     * 初始化起始节点路由
+     * @param ruleChain
+     * @param ruleNodeList
+     */
     private void initRoutes(RuleChain ruleChain, List<RuleNode> ruleNodeList) {
         nodeRoutes.clear();
         // Populating the routes map;
@@ -201,6 +215,10 @@ public class RuleChainActorMessageProcessor extends ComponentMsgProcessor<RuleCh
         }
     }
 
+    /**
+     * 设备时序数据发送给规则引擎
+     * @param envelope
+     */
     void onDeviceActorToRuleEngineMsg(DeviceActorToRuleEngineMsg envelope) {
         checkActive();
         if (firstNode != null) {
@@ -226,6 +244,10 @@ public class RuleChainActorMessageProcessor extends ComponentMsgProcessor<RuleCh
         }
     }
 
+    /**
+     * 路由到下一个节点
+     * @param envelope
+     */
     void onTellNext(RuleNodeToRuleChainTellNextMsg envelope) {
         checkActive();
         TbMsg msg = envelope.getMsg();

@@ -59,6 +59,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
+ * transport的remote模式
+ * 1. MqttTransportService将消息发送给Kafka
+ * 2. RemoteRuleEngineTransportService订阅Kafka消息
+ * 2. RemoteRuleEngineTransportService将消息交给Actor集群进行处理
+ * transport的local模式，详见{@link org.thingsboard.server.service.transport.LocalTransportService}
  * Created by ashvayka on 09.10.18.
  */
 @Slf4j
